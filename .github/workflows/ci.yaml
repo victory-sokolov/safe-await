@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+      - '.*'
+      - package.json
+      - pnpm-lock.yaml
+
+  pull_request:
+    branches: [main]
+    paths-ignore:
+      - '*.md'
+      - '.*'
+      - package.json
+      - pnpm-lock.yaml
+
+  workflow_dispatch:
+
+# Add cancel in-progress for a concurrency group
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Europe/Latvian
+    strategy:
+      fail-fast: true
+
+    steps:
+      - name: Checkout commit
+        uses: actions/checkout@v4.1.7
+        with:
+          fetch-depth: 0
+
+      - name: Read .nvmrc
+        run: |
+          NODE_VERSION=$(cat .nvmrc)
+          echo "NODE_VERSION=$NODE_VERSION" >> $GITHUB_OUTPUT
+        id: nvm
+
+      - name: Setup pnpm
+        uses: ./.github/actions/install-deps
+
+      - name: Use Node.js ${{ steps.nvm.outputs.NODE_VERSION }}
+        uses: actions/setup-node@v4.1.0
+        with:
+          node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Run linter
+        run: pnpm lint
+
+      - name: Run typechecker
+        run: pnpm typecheck
+
+      - name: Run tests
+        run: pnpm test:no-watch
+
+      - name: Build
+        run: pnpm build

@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write # to be able to publish a GitHub release
+  issues: write # to be able to comment on released issues
+  pull-requests: write # to be able to comment on released pull requests
+  id-token: write # to enable use of OIDC for npm provenance
+
+jobs:
+  release:
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout commit
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read .nvmrc
+        run: |
+          NODE_VERSION=$(cat .nvmrc)
+          echo "NODE_VERSION=$NODE_VERSION" >> $GITHUB_OUTPUT
+        id: nvm
+
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4.1.0
+        with:
+          node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: ./.github/actions/install-deps
+
+      - name: Release new version to NPM
+        run: pnpm build && pnpm semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
