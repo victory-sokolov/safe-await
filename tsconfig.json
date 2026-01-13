@@ -1,0 +1,44 @@
+{
+    "compilerOptions": {
+        "target": "es2017",
+        "lib": [
+            "esnext"
+        ],
+        "module": "esnext",
+        "moduleResolution": "node",
+        "baseUrl": "./src",
+        "paths": {
+            "@/*": [ "./src/*" ]
+        },
+        "types": [
+            "node",
+            "vitest/globals"
+        ],
+        "allowJs": true,
+        "strict": true,
+        "strictFunctionTypes": true,
+        "strictNullChecks": true,
+        "allowUnreachableCode": false,
+        "noUncheckedIndexedAccess": true,
+        "noUnusedLocals": false,
+        "declaration": true,
+        "importHelpers": true,
+        "noEmit": true,
+        "outDir": "./dist",
+        "removeComments": true,
+        "stripInternal": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "skipLibCheck": true
+    },
+    "include": [
+        "src/**/*.ts",
+        "tests"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "**/__mocks__/*"
+    ]
+}
